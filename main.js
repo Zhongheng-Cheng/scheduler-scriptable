@@ -77,7 +77,7 @@ function buildEventsStack(item, stack) {
   
     dF.dateFormat = "HH:mm";
     const entryTime = entryStack.addText(
-      dF.string(item.startDate) + " - " + dF.string(item.endDate)
+      dF.string(item.startDate)
     );
     entryTime.font = Font.semiboldSystemFont(11);
     entryTime.textColor = new Color(eventColor);
