@@ -76,8 +76,12 @@ function buildEventsStack(item, stack) {
     entryTitle.lineLimit = 1;
   
     dF.dateFormat = "HH:mm";
+    let additionalText = dF.string(item.startDate);
+    if (item.location) {
+        additionalText += ' ' + item.location;
+    }
     const entryTime = entryStack.addText(
-      dF.string(item.startDate)
+        additionalText
     );
     entryTime.font = Font.semiboldSystemFont(11);
     entryTime.textColor = new Color(eventColor);
