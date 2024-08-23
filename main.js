@@ -28,7 +28,6 @@ rightStack.layoutVertically();
 rightStack.size = new Size(160, 0);
 rightStack.borderWidth = 1;
 rightStack.borderColor = new Color("#FF9500");
-await getDueBeforeTodayTasks();
 
 const eventsList = await getEventsList();
 console.log(eventsList);
@@ -84,38 +83,52 @@ function buildEventsStack(item, stack) {
     entryTime.textOpacity = 0.8;
 }
 
-async function getDueBeforeTodayTasks() {
+async function getTaskLists() {
     let allReminders = await Reminder.allIncomplete();
-
+  
     let today = new Date();
     today.setHours(0, 0, 0, 0);
-
+  
+    let tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+  
     let dueReminders = allReminders.filter(reminder => {
-        return reminder.dueDate && reminder.dueDate <= today;
+      return reminder.dueDate && reminder.dueDate < tomorrow;
     });
-
-    for (let reminder of dueReminders) {
-        console.log(`Title: ${reminder.title}, Due Date: ${reminder.dueDate}`);
+  
+    let upcomingReminders = allReminders.filter(reminder => {
+      return reminder.dueDate && reminder.dueDate >= tomorrow;
+    });
+  
+    return {
+        dueReminders: dueReminders,
+        upcomingReminders: upcomingReminders
     };
-
-    return dueReminders;
 }
 
+
+
 async function generateReminders(stack) {
-    const tasks = await getDueBeforeTodayTasks();
-  
-    stack.backgroundColor = new Color(kRemindersBackgroundColor);
-    stack.cornerRadius = 15;
-    stack.setPadding(2, 8, 1, 0);
-    stack.url = "x-apple-reminderkit://";
-  
-    // generateRemindersTitle(stack, tasks.length);
-  
-    stack.addSpacer(8);
-  
-    tasks
+    const taskLists = await getTaskLists();
+    // stack.url = "x-apple-reminderkit://";
+
+    let dueStack = stack.addStack();
+    dueStack.layoutVertically();
+    dueStack.backgroundColor = new Color(kRemindersBackgroundColor);
+    dueStack.cornerRadius = 15;
+    dueStack.size = new Size(150, 0);
+    dueStack.setPadding(5, 10, 5, 10);
+    taskLists.dueReminders
         .splice(0, 5)
-        .forEach((task) => generateRemindersEntry(stack, task.title));
+        .forEach((task) => generateRemindersEntry(dueStack, task.title));
+
+    let upcomingStack = stack.addStack();
+    upcomingStack.layoutVertically();
+    upcomingStack.cornerRadius = 15;
+    upcomingStack.setPadding(5, 10, 5, 10);
+    taskLists.upcomingReminders
+        .splice(0, 5)
+        .forEach((task) => generateRemindersEntry(upcomingStack, task.title));
   
     stack.addSpacer(4);
 }
