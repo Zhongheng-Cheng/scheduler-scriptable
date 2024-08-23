@@ -1,4 +1,12 @@
+// Variables used by Scriptable.
+// These must be at the very top of the file. Do not edit.
+// icon-color: light-gray; icon-glyph: calendar-alt;
+
+const kDayColor = "#c35b22";
 const kWeekendColor = "#d19847";
+const kMainBackgroundColor = "#1C1C1E";
+const kRemindersBackgroundColor = "#EEEEEE";
+const kCalendarBackgroundColor = "#2C2C2E";
 const dF = new DateFormatter();
 
 let widget = new ListWidget();
@@ -13,21 +21,21 @@ leftStack.size = new Size(160, 150);
 leftStack.borderWidth = 1;
 leftStack.borderColor = new Color("#FF9500");
 
-let spacer = mainStack.addSpacer(20);
+let spacer = mainStack.addSpacer(5);
 
 let rightStack = mainStack.addStack();
 rightStack.layoutVertically();
 rightStack.size = new Size(160, 0);
 rightStack.borderWidth = 1;
 rightStack.borderColor = new Color("#FF9500");
-let rightText = rightStack.addText("Right Side");
-rightText.font = Font.boldSystemFont(16);
-rightText.textColor = new Color("#000000");
+await getDueBeforeTodayTasks();
 
 const eventsList = await getEventsList();
 console.log(eventsList);
 eventsList.forEach((item) => buildEventsStack(item, leftStack));
 leftStack.addSpacer();
+
+await generateReminders(rightStack);
 
 if (config.runsInWidget) {
   Script.setWidget(widget);
@@ -74,4 +82,73 @@ function buildEventsStack(item, stack) {
     entryTime.font = Font.semiboldSystemFont(11);
     entryTime.textColor = new Color(kWeekendColor);
     entryTime.textOpacity = 0.8;
-  }
+}
+
+async function getDueBeforeTodayTasks() {
+    let allReminders = await Reminder.allIncomplete();
+
+    let today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let dueReminders = allReminders.filter(reminder => {
+        return reminder.dueDate && reminder.dueDate <= today;
+    });
+
+    for (let reminder of dueReminders) {
+        console.log(`Title: ${reminder.title}, Due Date: ${reminder.dueDate}`);
+    };
+
+    return dueReminders;
+}
+
+async function generateReminders(stack) {
+    const tasks = await getDueBeforeTodayTasks();
+  
+    stack.backgroundColor = new Color(kRemindersBackgroundColor);
+    stack.cornerRadius = 15;
+    stack.setPadding(2, 8, 1, 0);
+    stack.url = "x-apple-reminderkit://";
+  
+    // generateRemindersTitle(stack, tasks.length);
+  
+    stack.addSpacer(8);
+  
+    tasks
+        .splice(0, 5)
+        .forEach((task) => generateRemindersEntry(stack, task.title));
+  
+    stack.addSpacer(4);
+}
+  
+function generateRemindersTitle(stack, taskCount) {
+    const titleStack = stack.addStack();
+    titleStack.bottomAlignContent();
+  
+    const countStack = titleStack.addStack();
+    const count = countStack.addText(taskCount + "");
+    count.font = Font.heavySystemFont(25);
+    count.textColor = new Color(kDayColor);
+  
+    titleStack.addSpacer(2);
+  
+    const nameStack = titleStack.addStack();
+    nameStack.layoutVertically();
+    const title = nameStack.addText("REMINDERS");
+    title.font = Font.boldMonospacedSystemFont(15);
+    title.textColor = new Color(kMainBackgroundColor);
+    nameStack.addSpacer(3);
+  
+    titleStack.addSpacer();
+}
+  
+function generateRemindersEntry(stack, reminder) {
+    const entryStack = stack.addStack();
+    entryStack.layoutVertically();
+    entryStack.setPadding(0, 0, 0, 5);
+    const entryText = entryStack.addText(reminder);
+    entryText.textColor = new Color(kCalendarBackgroundColor);
+    entryText.font = Font.semiboldSystemFont(12);
+    entryText.lineLimit = 1;
+  
+    stack.addSpacer(6);
+}
