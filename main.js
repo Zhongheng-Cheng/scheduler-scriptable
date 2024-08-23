@@ -3,7 +3,6 @@
 // icon-color: light-gray; icon-glyph: calendar-alt;
 
 const kDayColor = "#c35b22";
-const kWeekendColor = "#d19847";
 const kMainBackgroundColor = "#1C1C1E";
 const kRemindersBackgroundColor = "#EEEEEE";
 const kCalendarBackgroundColor = "#2C2C2E";
@@ -60,18 +59,19 @@ async function getEventsList() {
 
 
 function buildEventsStack(item, stack) {
+    const eventColor = item.calendar.color.hex;
     stack.addSpacer(7);
     const entryStack = stack.addStack();
     entryStack.layoutVertically();
     entryStack.borderWidth = 3;
-    entryStack.borderColor = new Color(kWeekendColor);
+    entryStack.borderColor = new Color(eventColor);
     entryStack.cornerRadius = 5;
     entryStack.size = new Size(150, 0);
     entryStack.setPadding(4, 10, 4, 10);
   
     const entryTitle = entryStack.addText(item.title);
     entryTitle.font = Font.boldSystemFont(13);
-    entryTitle.textColor = new Color(kWeekendColor);
+    entryTitle.textColor = new Color(eventColor);
     entryTitle.lineLimit = 1;
   
     dF.dateFormat = "HH:mm";
@@ -79,7 +79,7 @@ function buildEventsStack(item, stack) {
       dF.string(item.startDate) + " - " + dF.string(item.endDate)
     );
     entryTime.font = Font.semiboldSystemFont(11);
-    entryTime.textColor = new Color(kWeekendColor);
+    entryTime.textColor = new Color(eventColor);
     entryTime.textOpacity = 0.8;
 }
 
