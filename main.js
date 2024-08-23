@@ -19,6 +19,7 @@ leftStack.layoutVertically();
 leftStack.size = new Size(160, 150);
 leftStack.borderWidth = 1;
 leftStack.borderColor = new Color("#FF9500");
+leftStack.url = "calshow://";
 
 let spacer = mainStack.addSpacer(5);
 
@@ -110,7 +111,6 @@ async function getTaskLists() {
 
 async function generateReminders(stack) {
     const taskLists = await getTaskLists();
-    // stack.url = "x-apple-reminderkit://";
     let dueCount = taskLists.dueReminders.length;
     let upcomingCount = taskLists.upcomingReminders.length;
     if (dueCount > 0) {
@@ -120,6 +120,7 @@ async function generateReminders(stack) {
         dueStack.cornerRadius = 15;
         dueStack.size = new Size(160, 0);
         dueStack.setPadding(5, 10, 5, 10);
+        dueStack.url = "x-apple-reminderkit://TODAY";
         generateRemindersTitle(dueStack, taskLists.dueReminders.length, "Due Today")
         taskLists.dueReminders
             .splice(0, 6)
@@ -130,6 +131,7 @@ async function generateReminders(stack) {
         let upcomingStack = stack.addStack();
         upcomingStack.layoutVertically();
         upcomingStack.setPadding(5, 10, 0, 10);
+        upcomingStack.url = "x-apple-reminderkit://REMINDER/SCHEDULED";
         generateRemindersTitle(upcomingStack, taskLists.upcomingReminders.length, "Upcoming")
         taskLists.upcomingReminders
             .splice(0, 5 - dueCount)
