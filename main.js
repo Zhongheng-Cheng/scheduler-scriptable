@@ -118,6 +118,7 @@ async function generateReminders(stack) {
     dueStack.cornerRadius = 15;
     dueStack.size = new Size(150, 0);
     dueStack.setPadding(5, 10, 5, 10);
+    generateRemindersTitle(dueStack, taskLists.dueReminders.length, "Due Today")
     taskLists.dueReminders
         .splice(0, 5)
         .forEach((task) => generateRemindersEntry(dueStack, task.title));
@@ -126,6 +127,7 @@ async function generateReminders(stack) {
     upcomingStack.layoutVertically();
     upcomingStack.cornerRadius = 15;
     upcomingStack.setPadding(5, 10, 5, 10);
+    generateRemindersTitle(upcomingStack, taskLists.upcomingReminders.length, "Upcoming")
     taskLists.upcomingReminders
         .splice(0, 5)
         .forEach((task) => generateRemindersEntry(upcomingStack, task.title));
@@ -133,21 +135,21 @@ async function generateReminders(stack) {
     stack.addSpacer(4);
 }
   
-function generateRemindersTitle(stack, taskCount) {
+function generateRemindersTitle(stack, taskCount, titleContent) {
     const titleStack = stack.addStack();
     titleStack.bottomAlignContent();
   
     const countStack = titleStack.addStack();
     const count = countStack.addText(taskCount + "");
-    count.font = Font.heavySystemFont(25);
+    count.font = Font.heavySystemFont(17);
     count.textColor = new Color(kDayColor);
   
     titleStack.addSpacer(2);
   
     const nameStack = titleStack.addStack();
     nameStack.layoutVertically();
-    const title = nameStack.addText("REMINDERS");
-    title.font = Font.boldMonospacedSystemFont(15);
+    const title = nameStack.addText(titleContent);
+    title.font = Font.boldMonospacedSystemFont(12);
     title.textColor = new Color(kMainBackgroundColor);
     nameStack.addSpacer(3);
   
@@ -155,6 +157,7 @@ function generateRemindersTitle(stack, taskCount) {
 }
   
 function generateRemindersEntry(stack, reminder) {
+    stack.addSpacer(4);
     const entryStack = stack.addStack();
     entryStack.layoutVertically();
     entryStack.setPadding(0, 0, 0, 5);
@@ -162,6 +165,4 @@ function generateRemindersEntry(stack, reminder) {
     entryText.textColor = new Color(kCalendarBackgroundColor);
     entryText.font = Font.semiboldSystemFont(12);
     entryText.lineLimit = 1;
-  
-    stack.addSpacer(6);
 }
