@@ -29,7 +29,7 @@ rightStack.borderWidth = 1;
 rightStack.borderColor = new Color("#FF9500");
 
 const eventsList = await getEventsList();
-console.log(eventsList);
+// console.log(eventsList);
 eventsList.forEach((item) => buildEventsStack(item, leftStack));
 leftStack.addSpacer();
 
@@ -111,28 +111,30 @@ async function getTaskLists() {
 async function generateReminders(stack) {
     const taskLists = await getTaskLists();
     // stack.url = "x-apple-reminderkit://";
+    let dueCount = taskLists.dueReminders.length;
+    let upcomingCount = taskLists.upcomingReminders.length;
+    if (dueCount > 0) {
+        let dueStack = stack.addStack();
+        dueStack.layoutVertically();
+        dueStack.backgroundColor = new Color(kRemindersBackgroundColor);
+        dueStack.cornerRadius = 15;
+        dueStack.size = new Size(160, 0);
+        dueStack.setPadding(5, 10, 5, 10);
+        generateRemindersTitle(dueStack, taskLists.dueReminders.length, "Due Today")
+        taskLists.dueReminders
+            .splice(0, 6)
+            .forEach((task) => generateRemindersEntry(dueStack, task.title));
+    }
 
-    let dueStack = stack.addStack();
-    dueStack.layoutVertically();
-    dueStack.backgroundColor = new Color(kRemindersBackgroundColor);
-    dueStack.cornerRadius = 15;
-    dueStack.size = new Size(150, 0);
-    dueStack.setPadding(5, 10, 5, 10);
-    generateRemindersTitle(dueStack, taskLists.dueReminders.length, "Due Today")
-    taskLists.dueReminders
-        .splice(0, 5)
-        .forEach((task) => generateRemindersEntry(dueStack, task.title));
-
-    let upcomingStack = stack.addStack();
-    upcomingStack.layoutVertically();
-    upcomingStack.cornerRadius = 15;
-    upcomingStack.setPadding(5, 10, 5, 10);
-    generateRemindersTitle(upcomingStack, taskLists.upcomingReminders.length, "Upcoming")
-    taskLists.upcomingReminders
-        .splice(0, 5)
-        .forEach((task) => generateRemindersEntry(upcomingStack, task.title));
-  
-    stack.addSpacer(4);
+    if (dueCount <= 5 && upcomingCount > 0) {
+        let upcomingStack = stack.addStack();
+        upcomingStack.layoutVertically();
+        upcomingStack.setPadding(5, 10, 0, 10);
+        generateRemindersTitle(upcomingStack, taskLists.upcomingReminders.length, "Upcoming")
+        taskLists.upcomingReminders
+            .splice(0, 5 - dueCount)
+            .forEach((task) => generateRemindersEntry(upcomingStack, task.title));
+    }
 }
   
 function generateRemindersTitle(stack, taskCount, titleContent) {
