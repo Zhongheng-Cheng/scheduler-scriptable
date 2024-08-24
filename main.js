@@ -57,7 +57,7 @@ async function getEventsList() {
         .sort((a, b) =>
             a.startDate > b.startDate ? 1 : a.startDate < b.startDate ? -1 : 0
         )
-        .slice(0, ((6 - allDayEventsCount) / 2) | 0);
+        .slice(0, ((7 - allDayEventsCount) / 2) | 0);
     
     return {
         allDayEventsArray: allDayEventsArray,
@@ -104,6 +104,7 @@ function buildEventsStack(item, stack) {
         eventTime.font = Font.semiboldSystemFont(11);
         eventTime.textColor = new Color(eventColor);
         eventTime.textOpacity = 0.8;
+        eventTime.lineLimit = 1;
     }
     
 }
