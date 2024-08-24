@@ -18,8 +18,8 @@ mainStack.layoutHorizontally();
 let leftStack = mainStack.addStack();
 leftStack.layoutVertically();
 leftStack.size = new Size(160, 150);
-leftStack.borderWidth = 1;
-leftStack.borderColor = new Color("#FF9500");
+// leftStack.borderWidth = 1;
+// leftStack.borderColor = new Color("#FF9500");
 leftStack.url = "calshow://";
 
 let spacer = mainStack.addSpacer(5);
@@ -27,8 +27,8 @@ let spacer = mainStack.addSpacer(5);
 let rightStack = mainStack.addStack();
 rightStack.layoutVertically();
 rightStack.size = new Size(160, 0);
-rightStack.borderWidth = 1;
-rightStack.borderColor = new Color("#FF9500");
+// rightStack.borderWidth = 1;
+// rightStack.borderColor = new Color("#FF9500");
 
 const eventsList = await getEventsList();
 // console.log(eventsList);
