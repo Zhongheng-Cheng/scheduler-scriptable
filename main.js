@@ -2,14 +2,15 @@
 // These must be at the very top of the file. Do not edit.
 // icon-color: light-gray; icon-glyph: calendar-alt;
 
-const kDayColor = "#c35b22";
-const kMainBackgroundColor = "#1C1C1E";
-const kRemindersBackgroundColor = "#EEEEEE";
-const kCalendarBackgroundColor = "#2C2C2E";
+const colorBackground = "#2e2e2e";
+const colorReminderNumber = "#ee7800";
+const colorReminderTitle = "#00a3af";
+const colorReminderText = "#f8f4e6";
+const colorReminderDueToday = "#393f4c";
 const dF = new DateFormatter();
 
 let widget = new ListWidget();
-widget.backgroundColor = new Color("#ffffff");
+widget.backgroundColor = new Color(colorBackground);
 
 let mainStack = widget.addStack();
 mainStack.layoutHorizontally();
@@ -17,8 +18,8 @@ mainStack.layoutHorizontally();
 let leftStack = mainStack.addStack();
 leftStack.layoutVertically();
 leftStack.size = new Size(160, 150);
-leftStack.borderWidth = 1;
-leftStack.borderColor = new Color("#FF9500");
+// leftStack.borderWidth = 1;
+// leftStack.borderColor = new Color("#FF9500");
 leftStack.url = "calshow://";
 
 let spacer = mainStack.addSpacer(5);
@@ -26,8 +27,8 @@ let spacer = mainStack.addSpacer(5);
 let rightStack = mainStack.addStack();
 rightStack.layoutVertically();
 rightStack.size = new Size(160, 0);
-rightStack.borderWidth = 1;
-rightStack.borderColor = new Color("#FF9500");
+// rightStack.borderWidth = 1;
+// rightStack.borderColor = new Color("#FF9500");
 
 const eventsList = await getEventsList();
 // console.log(eventsList);
@@ -120,7 +121,7 @@ async function generateReminders(stack) {
     if (dueCount > 0) {
         let dueStack = stack.addStack();
         dueStack.layoutVertically();
-        dueStack.backgroundColor = new Color(kRemindersBackgroundColor);
+        dueStack.backgroundColor = new Color(colorReminderDueToday);
         dueStack.cornerRadius = 15;
         dueStack.size = new Size(160, 0);
         dueStack.setPadding(5, 10, 5, 10);
@@ -150,7 +151,7 @@ function generateRemindersTitle(stack, taskCount, titleContent) {
     const countStack = titleStack.addStack();
     const count = countStack.addText(taskCount + "");
     count.font = Font.heavySystemFont(17);
-    count.textColor = new Color(kDayColor);
+    count.textColor = new Color(colorReminderNumber);
   
     titleStack.addSpacer(2);
   
@@ -158,7 +159,7 @@ function generateRemindersTitle(stack, taskCount, titleContent) {
     nameStack.layoutVertically();
     const title = nameStack.addText(titleContent);
     title.font = Font.boldMonospacedSystemFont(12);
-    title.textColor = new Color(kMainBackgroundColor);
+    title.textColor = new Color(colorReminderTitle);
     nameStack.addSpacer(3);
   
     titleStack.addSpacer();
@@ -170,7 +171,7 @@ function generateRemindersEntry(stack, reminder) {
     entryStack.layoutVertically();
     entryStack.setPadding(0, 0, 0, 5);
     const entryText = entryStack.addText(reminder);
-    entryText.textColor = new Color(kCalendarBackgroundColor);
+    entryText.textColor = new Color(colorReminderText);
     entryText.font = Font.semiboldSystemFont(12);
     entryText.lineLimit = 1;
 }
