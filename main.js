@@ -17,21 +17,21 @@ mainStack.layoutHorizontally();
 
 let leftStack = mainStack.addStack();
 leftStack.layoutVertically();
-leftStack.size = new Size(160, 150);
-leftStack.url = "calshow://";
+leftStack.size = new Size(160, 0);
 
 let spacer = mainStack.addSpacer(5);
 
 let rightStack = mainStack.addStack();
 rightStack.layoutVertically();
-rightStack.size = new Size(160, 0);
+rightStack.size = new Size(160, 150);
+rightStack.url = "calshow://";
 
 const eventsList = await getEventsList();
-eventsList.allDayEventsArray.forEach((item) => buildEventsStack(item, leftStack));
-eventsList.uncomingEventsArray.forEach((item) => buildEventsStack(item, leftStack));
-leftStack.addSpacer();
+eventsList.allDayEventsArray.forEach((item) => buildEventsStack(item, rightStack));
+eventsList.uncomingEventsArray.forEach((item) => buildEventsStack(item, rightStack));
+rightStack.addSpacer();
 
-await generateReminders(rightStack);
+await generateReminders(leftStack);
 
 if (config.runsInWidget) {
   Script.setWidget(widget);
