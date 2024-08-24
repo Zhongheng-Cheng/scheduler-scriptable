@@ -4,7 +4,7 @@ An iOS Scriptable widget for displaying calendar events and reminders, in a comp
 
 ## Preview
 
-...
+<img src="https://github.com/Zhongheng-Cheng/scheduler-scriptable/blob/main/img/preview.jpg" width="50%" alt="Screenshot of a sample Scheduler widget">
 
 ## How to install
 
