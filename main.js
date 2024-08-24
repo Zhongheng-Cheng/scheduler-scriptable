@@ -17,25 +17,21 @@ mainStack.layoutHorizontally();
 
 let leftStack = mainStack.addStack();
 leftStack.layoutVertically();
-leftStack.size = new Size(160, 150);
-// leftStack.borderWidth = 1;
-// leftStack.borderColor = new Color("#FF9500");
-leftStack.url = "calshow://";
+leftStack.size = new Size(160, 0);
 
 let spacer = mainStack.addSpacer(5);
 
 let rightStack = mainStack.addStack();
 rightStack.layoutVertically();
-rightStack.size = new Size(160, 0);
-// rightStack.borderWidth = 1;
-// rightStack.borderColor = new Color("#FF9500");
+rightStack.size = new Size(160, 150);
+rightStack.url = "calshow://";
 
 const eventsList = await getEventsList();
-// console.log(eventsList);
-eventsList.forEach((item) => buildEventsStack(item, leftStack));
-leftStack.addSpacer();
+eventsList.allDayEventsArray.forEach((item) => buildEventsStack(item, rightStack));
+eventsList.uncomingEventsArray.forEach((item) => buildEventsStack(item, rightStack));
+rightStack.addSpacer();
 
-await generateReminders(rightStack);
+await generateReminders(leftStack);
 
 if (config.runsInWidget) {
   Script.setWidget(widget);
@@ -46,7 +42,14 @@ Script.complete();
 
 async function getEventsList() {
     const eventsArray = await CalendarEvent.today();
-    const incomingEventsArray = eventsArray
+    const allDayEventsArray = eventsArray
+        .filter(
+            (item) =>
+            item.isAllDay == true
+        )
+        .slice(0, 6);
+    const allDayEventsCount = allDayEventsArray.length;
+    const uncomingEventsArray = eventsArray
         .filter(
         (item) =>
             new Date(item.startDate).getTime() > new Date().getTime()
@@ -54,43 +57,63 @@ async function getEventsList() {
         .sort((a, b) =>
             a.startDate > b.startDate ? 1 : a.startDate < b.startDate ? -1 : 0
         )
-        .slice(0, 3);
+        .slice(0, ((6 - allDayEventsCount) / 2) | 0);
     
-    return incomingEventsArray;
+    return {
+        allDayEventsArray: allDayEventsArray,
+        uncomingEventsArray: uncomingEventsArray
+    };
 }
 
 
 function buildEventsStack(item, stack) {
     const eventColor = item.calendar.color.hex;
-    stack.addSpacer(7);
-    const entryStack = stack.addStack();
-    entryStack.layoutVertically();
-    entryStack.borderWidth = 3;
-    entryStack.borderColor = new Color(eventColor);
-    entryStack.cornerRadius = 5;
-    entryStack.size = new Size(150, 0);
-    entryStack.setPadding(4, 10, 4, 10);
-  
-    const entryTitle = entryStack.addText(item.title);
-    entryTitle.font = Font.boldSystemFont(13);
-    entryTitle.textColor = new Color(eventColor);
-    entryTitle.lineLimit = 1;
-  
-    dF.dateFormat = "HH:mm";
-    let additionalText = dF.string(item.startDate);
-    if (item.location) {
-        additionalText += ' ' + item.location;
+    stack.addSpacer(1);
+    let entryStack = stack.addStack();
+    entryStack.layoutHorizontally();
+    entryStack.centerAlignContent();
+
+    let borderStack = entryStack.addStack();
+    if (item.isAllDay) {
+        borderStack.size = new Size(5, 21);
+    } else {
+        borderStack.size = new Size(5, 35);
     }
-    const entryTime = entryStack.addText(
-        additionalText
-    );
-    entryTime.font = Font.semiboldSystemFont(11);
-    entryTime.textColor = new Color(eventColor);
-    entryTime.textOpacity = 0.8;
+    borderStack.backgroundColor = new Color(eventColor);
+    borderStack.cornerRadius = 3;
+    
+    let textStack = entryStack.addStack();
+    textStack.layoutVertically();
+    textStack.backgroundColor = new Color(eventColor, 0.05);
+    textStack.cornerRadius = 8;
+    textStack.size = new Size(150, 0);
+    textStack.setPadding(3, 8, 3, 8);
+  
+    const eventTitle = textStack.addText(item.title);
+    eventTitle.font = Font.boldSystemFont(13);
+    eventTitle.textColor = new Color(eventColor);
+    eventTitle.lineLimit = 1;
+  
+    if (!item.isAllDay) {
+        dF.dateFormat = "HH:mm";
+        let additionalText = dF.string(item.startDate);
+        if (item.location) {
+            additionalText += ' ' + item.location;
+        }
+        const eventTime = textStack.addText(additionalText);
+        eventTime.font = Font.semiboldSystemFont(11);
+        eventTime.textColor = new Color(eventColor);
+        eventTime.textOpacity = 0.8;
+    }
+    
 }
 
 async function getTaskLists() {
-    let allReminders = await Reminder.allIncomplete();
+    const allRemindersArray = await Reminder.allIncomplete()
+    const allReminders = allRemindersArray
+        .sort((a, b) =>
+        a.dueDate > b.dueDate ? 1 : a.dueDate < b.dueDate ? -1 : 0
+    );
   
     let today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -124,23 +147,22 @@ async function generateReminders(stack) {
         dueStack.backgroundColor = new Color(colorReminderDueToday);
         dueStack.cornerRadius = 15;
         dueStack.size = new Size(160, 0);
-        dueStack.setPadding(5, 10, 5, 10);
+        dueStack.setPadding(5, 10, 5, 5);
         dueStack.url = "x-apple-reminderkit://TODAY";
         generateRemindersTitle(dueStack, taskLists.dueReminders.length, "Due Today")
         taskLists.dueReminders
             .splice(0, 6)
-            .forEach((task) => generateRemindersEntry(dueStack, task.title));
+            .forEach((task) => generateRemindersEntry(dueStack, task, false));
     }
 
     if (dueCount <= 5 && upcomingCount > 0) {
         let upcomingStack = stack.addStack();
-        upcomingStack.layoutVertically();
-        upcomingStack.setPadding(5, 10, 0, 10);
+        upcomingStack.setPadding(5, 10, 0, 5);
         upcomingStack.url = "x-apple-reminderkit://REMINDER/SCHEDULED";
         generateRemindersTitle(upcomingStack, taskLists.upcomingReminders.length, "Upcoming")
         taskLists.upcomingReminders
             .splice(0, 5 - dueCount)
-            .forEach((task) => generateRemindersEntry(upcomingStack, task.title));
+            .forEach((task) => generateRemindersEntry(upcomingStack, task, true));
     }
 }
   
@@ -165,13 +187,36 @@ function generateRemindersTitle(stack, taskCount, titleContent) {
     titleStack.addSpacer();
 }
   
-function generateRemindersEntry(stack, reminder) {
+function generateRemindersEntry(stack, task, showDate) {
+    stack.layoutVertically();
     stack.addSpacer(4);
     const entryStack = stack.addStack();
-    entryStack.layoutVertically();
-    entryStack.setPadding(0, 0, 0, 5);
-    const entryText = entryStack.addText(reminder);
-    entryText.textColor = new Color(colorReminderText);
-    entryText.font = Font.semiboldSystemFont(12);
-    entryText.lineLimit = 1;
+    entryStack.layoutHorizontally();
+
+    const textStack = entryStack.addStack();
+    const titleText = textStack.addText(task.title);
+    titleText.textColor = new Color(colorReminderText);
+    titleText.font = Font.semiboldSystemFont(12);
+    titleText.lineLimit = 1;
+
+    entryStack.addSpacer();
+
+    const timeStack = entryStack.addStack();
+    if (!showDate) {
+        if (task.dueDateIncludesTime) {
+            dF.dateFormat = "HH:mm";
+            let timeText = dF.string(task.dueDate);
+            
+            const taskTime = timeStack.addText(timeText);
+            taskTime.font = Font.semiboldSystemFont(12);
+            taskTime.textColor = new Color(colorReminderText);
+        }
+    } else {
+        dF.dateFormat = "MM/dd";
+        let timeText = dF.string(task.dueDate);
+        
+        const taskTime = timeStack.addText(timeText);
+        taskTime.font = Font.semiboldSystemFont(12);
+        taskTime.textColor = new Color(colorReminderText);
+    }
 }
