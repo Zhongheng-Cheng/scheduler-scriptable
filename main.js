@@ -18,8 +18,6 @@ mainStack.layoutHorizontally();
 let leftStack = mainStack.addStack();
 leftStack.layoutVertically();
 leftStack.size = new Size(160, 150);
-// leftStack.borderWidth = 1;
-// leftStack.borderColor = new Color("#FF9500");
 leftStack.url = "calshow://";
 
 let spacer = mainStack.addSpacer(5);
@@ -27,12 +25,8 @@ let spacer = mainStack.addSpacer(5);
 let rightStack = mainStack.addStack();
 rightStack.layoutVertically();
 rightStack.size = new Size(160, 0);
-// rightStack.borderWidth = 1;
-// rightStack.borderColor = new Color("#FF9500");
 
 const eventsList = await getEventsList();
-console.log(eventsList.allDayEventsArray);
-console.log(eventsList.uncomingEventsArray);
 eventsList.allDayEventsArray.forEach((item) => buildEventsStack(item, leftStack));
 eventsList.uncomingEventsArray.forEach((item) => buildEventsStack(item, leftStack));
 leftStack.addSpacer();
@@ -106,9 +100,7 @@ function buildEventsStack(item, stack) {
         if (item.location) {
             additionalText += ' ' + item.location;
         }
-        const eventTime = textStack.addText(
-            additionalText
-        );
+        const eventTime = textStack.addText(additionalText);
         eventTime.font = Font.semiboldSystemFont(11);
         eventTime.textColor = new Color(eventColor);
         eventTime.textOpacity = 0.8;
@@ -117,7 +109,11 @@ function buildEventsStack(item, stack) {
 }
 
 async function getTaskLists() {
-    let allReminders = await Reminder.allIncomplete();
+    const allRemindersArray = await Reminder.allIncomplete()
+    const allReminders = allRemindersArray
+        .sort((a, b) =>
+        a.dueDate > b.dueDate ? 1 : a.dueDate < b.dueDate ? -1 : 0
+    );
   
     let today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -151,23 +147,22 @@ async function generateReminders(stack) {
         dueStack.backgroundColor = new Color(colorReminderDueToday);
         dueStack.cornerRadius = 15;
         dueStack.size = new Size(160, 0);
-        dueStack.setPadding(5, 10, 5, 10);
+        dueStack.setPadding(5, 10, 5, 5);
         dueStack.url = "x-apple-reminderkit://TODAY";
         generateRemindersTitle(dueStack, taskLists.dueReminders.length, "Due Today")
         taskLists.dueReminders
             .splice(0, 6)
-            .forEach((task) => generateRemindersEntry(dueStack, task.title));
+            .forEach((task) => generateRemindersEntry(dueStack, task, false));
     }
 
     if (dueCount <= 5 && upcomingCount > 0) {
         let upcomingStack = stack.addStack();
-        upcomingStack.layoutVertically();
-        upcomingStack.setPadding(5, 10, 0, 10);
+        upcomingStack.setPadding(5, 10, 0, 5);
         upcomingStack.url = "x-apple-reminderkit://REMINDER/SCHEDULED";
         generateRemindersTitle(upcomingStack, taskLists.upcomingReminders.length, "Upcoming")
         taskLists.upcomingReminders
             .splice(0, 5 - dueCount)
-            .forEach((task) => generateRemindersEntry(upcomingStack, task.title));
+            .forEach((task) => generateRemindersEntry(upcomingStack, task, true));
     }
 }
   
@@ -192,13 +187,36 @@ function generateRemindersTitle(stack, taskCount, titleContent) {
     titleStack.addSpacer();
 }
   
-function generateRemindersEntry(stack, reminder) {
+function generateRemindersEntry(stack, task, showDate) {
+    stack.layoutVertically();
     stack.addSpacer(4);
     const entryStack = stack.addStack();
-    entryStack.layoutVertically();
-    entryStack.setPadding(0, 0, 0, 5);
-    const entryText = entryStack.addText(reminder);
-    entryText.textColor = new Color(colorReminderText);
-    entryText.font = Font.semiboldSystemFont(12);
-    entryText.lineLimit = 1;
+    entryStack.layoutHorizontally();
+
+    const textStack = entryStack.addStack();
+    const titleText = textStack.addText(task.title);
+    titleText.textColor = new Color(colorReminderText);
+    titleText.font = Font.semiboldSystemFont(12);
+    titleText.lineLimit = 1;
+
+    entryStack.addSpacer();
+
+    const timeStack = entryStack.addStack();
+    if (!showDate) {
+        if (task.dueDateIncludesTime) {
+            dF.dateFormat = "HH:mm";
+            let timeText = dF.string(task.dueDate);
+            
+            const taskTime = timeStack.addText(timeText);
+            taskTime.font = Font.semiboldSystemFont(12);
+            taskTime.textColor = new Color(colorReminderText);
+        }
+    } else {
+        dF.dateFormat = "MM/dd";
+        let timeText = dF.string(task.dueDate);
+        
+        const taskTime = timeStack.addText(timeText);
+        taskTime.font = Font.semiboldSystemFont(12);
+        taskTime.textColor = new Color(colorReminderText);
+    }
 }
