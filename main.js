@@ -62,31 +62,39 @@ async function getEventsList() {
 
 function buildEventsStack(item, stack) {
     const eventColor = item.calendar.color.hex;
-    stack.addSpacer(7);
-    const entryStack = stack.addStack();
-    entryStack.layoutVertically();
-    entryStack.borderWidth = 3;
-    entryStack.borderColor = new Color(eventColor);
-    entryStack.cornerRadius = 5;
-    entryStack.size = new Size(150, 0);
-    entryStack.setPadding(4, 10, 4, 10);
+    stack.addSpacer(5);
+    let entryStack = stack.addStack();
+    entryStack.layoutHorizontally();
+    entryStack.centerAlignContent();
+
+    let borderStack = entryStack.addStack();
+    borderStack.size = new Size(5, 35);
+    borderStack.backgroundColor = new Color(eventColor);
+    borderStack.cornerRadius = 3;
+    
+    let textStack = entryStack.addStack();
+    textStack.layoutVertically();
+    textStack.backgroundColor = new Color(eventColor, 0.05);
+    textStack.cornerRadius = 10;
+    textStack.size = new Size(150, 0);
+    textStack.setPadding(4, 8, 4, 8);
   
-    const entryTitle = entryStack.addText(item.title);
-    entryTitle.font = Font.boldSystemFont(13);
-    entryTitle.textColor = new Color(eventColor);
-    entryTitle.lineLimit = 1;
+    const eventTitle = textStack.addText(item.title);
+    eventTitle.font = Font.boldSystemFont(13);
+    eventTitle.textColor = new Color(eventColor);
+    eventTitle.lineLimit = 1;
   
     dF.dateFormat = "HH:mm";
     let additionalText = dF.string(item.startDate);
     if (item.location) {
         additionalText += ' ' + item.location;
     }
-    const entryTime = entryStack.addText(
+    const eventTime = textStack.addText(
         additionalText
     );
-    entryTime.font = Font.semiboldSystemFont(11);
-    entryTime.textColor = new Color(eventColor);
-    entryTime.textOpacity = 0.8;
+    eventTime.font = Font.semiboldSystemFont(11);
+    eventTime.textColor = new Color(eventColor);
+    eventTime.textOpacity = 0.8;
 }
 
 async function getTaskLists() {
