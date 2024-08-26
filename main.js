@@ -28,7 +28,7 @@ rightStack.url = "calshow://";
 
 const eventsList = await getEventsList();
 eventsList.allDayEventsArray.forEach((item) => buildEventsStack(item, rightStack));
-eventsList.uncomingEventsArray.forEach((item) => buildEventsStack(item, rightStack));
+eventsList.upcomingTodayEventsArray.forEach((item) => buildEventsStack(item, rightStack));
 rightStack.addSpacer();
 
 await generateReminders(leftStack);
@@ -49,7 +49,7 @@ async function getEventsList() {
         )
         .slice(0, 6);
     const allDayEventsCount = allDayEventsArray.length;
-    const uncomingEventsArray = eventsArray
+    const upcomingTodayEventsArray = eventsArray
         .filter(
         (item) =>
             new Date(item.startDate).getTime() > new Date().getTime()
@@ -61,7 +61,7 @@ async function getEventsList() {
     
     return {
         allDayEventsArray: allDayEventsArray,
-        uncomingEventsArray: uncomingEventsArray
+        upcomingTodayEventsArray: upcomingTodayEventsArray
     };
 }
 
