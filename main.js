@@ -27,8 +27,7 @@ rightStack.size = new Size(160, 150);
 rightStack.url = "calshow://";
 
 const eventsList = await getEventsList();
-eventsList.allDayEventsArray.forEach((item) => buildEventsStack(item, rightStack));
-eventsList.upcomingTodayEventsArray.forEach((item) => buildEventsStack(item, rightStack));
+eventsList.forEach((item) => buildEventsStack(item, rightStack));
 rightStack.addSpacer();
 
 await generateReminders(leftStack);
@@ -41,28 +40,28 @@ Script.complete();
 
 
 async function getEventsList() {
-    const eventsArray = await CalendarEvent.today();
-    const allDayEventsArray = eventsArray
-        .filter(
-            (item) =>
-            item.isAllDay == true
-        )
-        .slice(0, 6);
-    const allDayEventsCount = allDayEventsArray.length;
-    const upcomingTodayEventsArray = eventsArray
-        .filter(
-        (item) =>
-            new Date(item.startDate).getTime() > new Date().getTime()
-        )
-        .sort((a, b) =>
-            a.startDate > b.startDate ? 1 : a.startDate < b.startDate ? -1 : 0
-        )
-        .slice(0, ((7 - allDayEventsCount) / 2) | 0);
-    
-    return {
-        allDayEventsArray: allDayEventsArray,
-        upcomingTodayEventsArray: upcomingTodayEventsArray
-    };
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + 3);
+    const eventsArray = await CalendarEvent.between(startDate, endDate);
+
+    let remainingRows = 7;
+    let eventsDisplayArray = [];
+    for (const event of eventsArray) {
+        if (event.isAllDay) {
+            remainingRows -= 1;
+        } else {
+            remainingRows -= 2;
+        }
+
+        if (remainingRows >= 0) {
+            eventsDisplayArray.push(event);
+        } else {
+            break;
+        }
+    }
+
+    return eventsDisplayArray;
 }
 
 
