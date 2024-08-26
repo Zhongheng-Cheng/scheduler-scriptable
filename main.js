@@ -8,6 +8,8 @@ const colorReminderTitle = "#00a3af";
 const colorReminderText = "#f8f4e6";
 const colorReminderDueToday = "#393f4c";
 const dF = new DateFormatter();
+today = new Date();
+today.setHours(0, 0, 0, 0);
 
 let widget = new ListWidget();
 widget.backgroundColor = new Color(colorBackground);
@@ -88,10 +90,17 @@ function buildEventsStack(item, stack) {
     textStack.size = new Size(150, 0);
     textStack.setPadding(3, 8, 3, 8);
   
-    const eventTitle = textStack.addText(item.title);
-    eventTitle.font = Font.boldSystemFont(13);
-    eventTitle.textColor = new Color(eventColor);
-    eventTitle.lineLimit = 1;
+    titleStack = textStack.addStack();
+    let tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    if (item.startDate < tomorrow) {
+        generateItemTitle(titleStack, item.title, eventColor);
+    } else {
+        dF.dateFormat = "MM/dd";
+        let timeText = dF.string(item.startDate);
+        generateItemTitle(titleStack, item.title, eventColor, timeText, eventColor);
+    }
+    
   
     if (!item.isAllDay) {
         dF.dateFormat = "HH:mm";
@@ -114,9 +123,6 @@ async function getTaskLists() {
         .sort((a, b) =>
         a.dueDate > b.dueDate ? 1 : a.dueDate < b.dueDate ? -1 : 0
     );
-  
-    let today = new Date();
-    today.setHours(0, 0, 0, 0);
   
     let tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
@@ -191,7 +197,6 @@ function generateRemindersEntry(stack, task, showDate) {
     stack.layoutVertically();
     stack.addSpacer(4);
     const entryStack = stack.addStack();
-    entryStack.layoutHorizontally();
 
     if (!showDate) {
         if (task.dueDateIncludesTime) {
@@ -209,10 +214,12 @@ function generateRemindersEntry(stack, task, showDate) {
 }
 
 function generateItemTitle(stack, title, titleColor, date, dateColor) {
+    stack.layoutHorizontally();
+    stack.bottomAlignContent();
     const textStack = stack.addStack();
     const titleText = textStack.addText(title);
     titleText.textColor = new Color(titleColor);
-    titleText.font = Font.semiboldSystemFont(12);
+    titleText.font = Font.semiboldSystemFont(13);
     titleText.lineLimit = 1;
 
     stack.addSpacer();
@@ -220,7 +227,7 @@ function generateItemTitle(stack, title, titleColor, date, dateColor) {
     if (date) {
         const timeStack = stack.addStack();
         const taskTime = timeStack.addText(date);
-        taskTime.font = Font.semiboldSystemFont(12);
+        taskTime.font = Font.semiboldSystemFont(10);
         taskTime.textColor = new Color(dateColor);
     }
 }
