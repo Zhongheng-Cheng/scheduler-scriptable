@@ -193,30 +193,34 @@ function generateRemindersEntry(stack, task, showDate) {
     const entryStack = stack.addStack();
     entryStack.layoutHorizontally();
 
-    const textStack = entryStack.addStack();
-    const titleText = textStack.addText(task.title);
-    titleText.textColor = new Color(colorReminderText);
-    titleText.font = Font.semiboldSystemFont(12);
-    titleText.lineLimit = 1;
-
-    entryStack.addSpacer();
-
-    const timeStack = entryStack.addStack();
     if (!showDate) {
         if (task.dueDateIncludesTime) {
             dF.dateFormat = "HH:mm";
             let timeText = dF.string(task.dueDate);
-            
-            const taskTime = timeStack.addText(timeText);
-            taskTime.font = Font.semiboldSystemFont(12);
-            taskTime.textColor = new Color(colorReminderText);
+            generateItemTitle(entryStack, task.title, colorReminderText, timeText, colorReminderText);
+        } else {
+            generateItemTitle(entryStack, task.title, colorReminderText);
         }
     } else {
         dF.dateFormat = "MM/dd";
         let timeText = dF.string(task.dueDate);
-        
-        const taskTime = timeStack.addText(timeText);
+        generateItemTitle(entryStack, task.title, colorReminderText, timeText, colorReminderText);
+    }
+}
+
+function generateItemTitle(stack, title, titleColor, date, dateColor) {
+    const textStack = stack.addStack();
+    const titleText = textStack.addText(title);
+    titleText.textColor = new Color(titleColor);
+    titleText.font = Font.semiboldSystemFont(12);
+    titleText.lineLimit = 1;
+
+    stack.addSpacer();
+
+    if (date) {
+        const timeStack = stack.addStack();
+        const taskTime = timeStack.addText(date);
         taskTime.font = Font.semiboldSystemFont(12);
-        taskTime.textColor = new Color(colorReminderText);
+        taskTime.textColor = new Color(dateColor);
     }
 }
