@@ -194,7 +194,7 @@ function generateRemindersTitle(stack, taskCount, titleContent) {
   
 function generateRemindersEntry(stack, task, showDate) {
     stack.layoutVertically();
-    stack.addSpacer(2);
+    stack.addSpacer(4);
     const entryStack = stack.addStack();
 
     if (!showDate) {
