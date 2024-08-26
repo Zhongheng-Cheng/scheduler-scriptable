@@ -19,13 +19,13 @@ mainStack.layoutHorizontally();
 
 let leftStack = mainStack.addStack();
 leftStack.layoutVertically();
-leftStack.size = new Size(160, 0);
+leftStack.size = new Size(162, 0);
 
-let spacer = mainStack.addSpacer(5);
+let spacer = mainStack.addSpacer(4);
 
 let rightStack = mainStack.addStack();
 rightStack.layoutVertically();
-rightStack.size = new Size(160, 150);
+rightStack.size = new Size(162, 150);
 rightStack.url = "calshow://";
 
 const eventsList = await getEventsList();
@@ -153,9 +153,10 @@ async function generateReminders(stack) {
         dueStack.backgroundColor = new Color(colorReminderDueToday);
         dueStack.cornerRadius = 15;
         dueStack.size = new Size(160, 0);
-        dueStack.setPadding(5, 10, 5, 5);
+        dueStack.setPadding(5, 8, 5, 5);
         dueStack.url = "x-apple-reminderkit://TODAY";
-        generateRemindersTitle(dueStack, taskLists.dueReminders.length, "Due Today")
+        const dueTitleStack = dueStack.addStack();
+        generateRemindersTitle(dueTitleStack, taskLists.dueReminders.length, "Due Today")
         taskLists.dueReminders
             .splice(0, 6)
             .forEach((task) => generateRemindersEntry(dueStack, task, false));
@@ -163,9 +164,10 @@ async function generateReminders(stack) {
 
     if (dueCount <= 5 && upcomingCount > 0) {
         let upcomingStack = stack.addStack();
-        upcomingStack.setPadding(5, 10, 0, 5);
+        upcomingStack.setPadding(2, 8, 0, 5);
         upcomingStack.url = "x-apple-reminderkit://REMINDER/SCHEDULED";
-        generateRemindersTitle(upcomingStack, taskLists.upcomingReminders.length, "Upcoming")
+        const upcomingTitleStack = upcomingStack.addStack();
+        generateRemindersTitle(upcomingTitleStack, taskLists.upcomingReminders.length, "Upcoming")
         taskLists.upcomingReminders
             .splice(0, 5 - dueCount)
             .forEach((task) => generateRemindersEntry(upcomingStack, task, true));
@@ -173,29 +175,26 @@ async function generateReminders(stack) {
 }
   
 function generateRemindersTitle(stack, taskCount, titleContent) {
-    const titleStack = stack.addStack();
-    titleStack.bottomAlignContent();
+    stack.layoutHorizontally();
+    stack.centerAlignContent();
   
-    const countStack = titleStack.addStack();
+    const countStack = stack.addStack();
     const count = countStack.addText(taskCount + "");
-    count.font = Font.heavySystemFont(17);
+    count.font = Font.heavySystemFont(13);
     count.textColor = new Color(colorReminderNumber);
   
-    titleStack.addSpacer(2);
+    stack.addSpacer(5);
   
-    const nameStack = titleStack.addStack();
+    const nameStack = stack.addStack();
     nameStack.layoutVertically();
     const title = nameStack.addText(titleContent);
-    title.font = Font.boldMonospacedSystemFont(12);
+    title.font = Font.boldMonospacedSystemFont(11);
     title.textColor = new Color(colorReminderTitle);
-    nameStack.addSpacer(3);
-  
-    titleStack.addSpacer();
 }
   
 function generateRemindersEntry(stack, task, showDate) {
     stack.layoutVertically();
-    stack.addSpacer(4);
+    stack.addSpacer(2);
     const entryStack = stack.addStack();
 
     if (!showDate) {
