@@ -93,11 +93,16 @@ function buildEventsStack(item, stack) {
     titleStack = textStack.addStack();
     let tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
+    let tomorrowEnd = new Date(today);
+    tomorrowEnd.setDate(today.getDate() + 2);
     if (item.startDate < tomorrow) {
         generateItemTitle(titleStack, item.title, eventColor);
+    } else if (item.startDate < tomorrowEnd) {
+        const timeText = "Tmr"
+        generateItemTitle(titleStack, item.title, eventColor, timeText, eventColor);
     } else {
         dF.dateFormat = "MM/dd";
-        let timeText = dF.string(item.startDate);
+        const timeText = dF.string(item.startDate);
         generateItemTitle(titleStack, item.title, eventColor, timeText, eventColor);
     }
     
@@ -197,6 +202,9 @@ function generateRemindersEntry(stack, task, showDate) {
     stack.addSpacer(4);
     const entryStack = stack.addStack();
 
+    let tomorrowEnd = new Date(today);
+    tomorrowEnd.setDate(today.getDate() + 2);
+
     if (!showDate) {
         if (task.dueDateIncludesTime) {
             dF.dateFormat = "HH:mm";
@@ -206,9 +214,14 @@ function generateRemindersEntry(stack, task, showDate) {
             generateItemTitle(entryStack, task.title, colorReminderText);
         }
     } else {
-        dF.dateFormat = "MM/dd";
-        let timeText = dF.string(task.dueDate);
-        generateItemTitle(entryStack, task.title, colorReminderText, timeText, colorReminderText);
+        if (task.dueDate < tomorrowEnd) {
+            const timeText = "Tmr";
+            generateItemTitle(entryStack, task.title, colorReminderText, timeText, colorReminderText);
+        } else {
+            dF.dateFormat = "MM/dd";
+            const timeText = dF.string(task.dueDate);
+            generateItemTitle(entryStack, task.title, colorReminderText, timeText, colorReminderText);
+        }
     }
 }
 
