@@ -255,7 +255,7 @@ function generateRefreshTime(stack, refreshTime) {
     const refreshTimeStack = stack.addStack();
     refreshTimeStack.layoutHorizontally();
     refreshTimeStack.addSpacer();
-    const refreshTimeText = refreshTimeStack.addText(dF.string(refreshTime));
+    const refreshTimeText = refreshTimeStack.addText("Last refresh: " + dF.string(refreshTime));
     refreshTimeText.textColor = new Color(colorReminderText);
     refreshTimeText.font = Font.semiboldSystemFont(8);
     refreshTimeText.lineLimit = 1;
