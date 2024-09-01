@@ -32,6 +32,11 @@ const eventsList = await getEventsList();
 eventsList.forEach((item) => buildEventsStack(item, rightStack));
 rightStack.addSpacer();
 
+let refreshAfterDate = new Date();
+refreshAfterDate.setSeconds(refreshAfterDate.getSeconds() + 5);
+widget.refreshAfterDate = refreshAfterDate;
+generateRefreshTime(rightStack, refreshAfterDate);
+
 await generateReminders(leftStack);
 
 if (config.runsInWidget) {
@@ -242,4 +247,16 @@ function generateItemTitle(stack, title, titleColor, date, dateColor) {
         taskTime.font = Font.semiboldSystemFont(10);
         taskTime.textColor = new Color(dateColor);
     }
+}
+
+function generateRefreshTime(stack, refreshTime) {
+    dF.dateFormat = "HH:mm:ss";
+    // let refreshTimeText = dF.string(refreshTime);
+    const refreshTimeStack = stack.addStack();
+    refreshTimeStack.layoutHorizontally();
+    refreshTimeStack.addSpacer();
+    const refreshTimeText = refreshTimeStack.addText(dF.string(refreshTime));
+    refreshTimeText.textColor = new Color(colorReminderText);
+    refreshTimeText.font = Font.semiboldSystemFont(8);
+    refreshTimeText.lineLimit = 1;
 }
