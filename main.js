@@ -14,6 +14,7 @@ today.setHours(0, 0, 0, 0);
 let widget = new ListWidget();
 widget.backgroundColor = new Color(colorBackground);
 
+// Setting main layout
 let mainStack = widget.addStack();
 mainStack.layoutHorizontally();
 
@@ -28,17 +29,13 @@ rightStack.layoutVertically();
 rightStack.size = new Size(162, 150);
 rightStack.url = "calshow://";
 
-const eventsList = await getEventsList();
-eventsList.forEach((item) => buildEventsStack(item, rightStack));
+// Build stacks
+await buildReminderStack(leftStack);
+await buildCalendarStack(rightStack);
 rightStack.addSpacer();
+addRefreshTimeStack(rightStack);
 
-let refreshAfterDate = new Date();
-refreshAfterDate.setSeconds(refreshAfterDate.getSeconds() + 5);
-widget.refreshAfterDate = refreshAfterDate;
-generateRefreshTime(rightStack, refreshAfterDate);
-
-await generateReminders(leftStack);
-
+// Run the widget
 if (config.runsInWidget) {
   Script.setWidget(widget);
 }
@@ -46,13 +43,13 @@ widget.presentMedium();
 Script.complete();
 
 
-async function getEventsList() {
+async function getEvents() {
     const startDate = new Date();
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + 3);
     const eventsArray = await CalendarEvent.between(startDate, endDate);
 
-    let remainingRows = 7;
+    let remainingRows = 6;
     let eventsDisplayArray = [];
     for (const event of eventsArray) {
         if (event.isAllDay) {
@@ -72,7 +69,7 @@ async function getEventsList() {
 }
 
 
-function buildEventsStack(item, stack) {
+function addEventEntry(item, stack) {
     const eventColor = item.calendar.color.hex;
     stack.addSpacer(1);
     let entryStack = stack.addStack();
@@ -81,7 +78,7 @@ function buildEventsStack(item, stack) {
 
     let borderStack = entryStack.addStack();
     if (item.isAllDay) {
-        borderStack.size = new Size(5, 21);
+        borderStack.size = new Size(5, 18);
     } else {
         borderStack.size = new Size(5, 35);
     }
@@ -101,14 +98,14 @@ function buildEventsStack(item, stack) {
     let tomorrowEnd = new Date(today);
     tomorrowEnd.setDate(today.getDate() + 2);
     if (item.startDate < tomorrow) {
-        generateItemTitle(titleStack, item.title, eventColor);
+        addEntry(titleStack, item.title, eventColor);
     } else if (item.startDate < tomorrowEnd) {
         const timeText = "Tmr"
-        generateItemTitle(titleStack, item.title, eventColor, timeText, eventColor);
+        addEntry(titleStack, item.title, eventColor, timeText, eventColor);
     } else {
         dF.dateFormat = "MM/dd";
         const timeText = dF.string(item.startDate);
-        generateItemTitle(titleStack, item.title, eventColor, timeText, eventColor);
+        addEntry(titleStack, item.title, eventColor, timeText, eventColor);
     }
     
   
@@ -127,7 +124,7 @@ function buildEventsStack(item, stack) {
     
 }
 
-async function getTaskLists() {
+async function getTasks() {
     const allRemindersArray = await Reminder.allIncomplete()
     const allReminders = allRemindersArray
         .sort((a, b) =>
@@ -152,9 +149,14 @@ async function getTaskLists() {
 }
 
 
+async function buildCalendarStack(stack) {
+    const eventsList = await getEvents();
+    eventsList.forEach((item) => addEventEntry(item, stack));
+}
 
-async function generateReminders(stack) {
-    const taskLists = await getTaskLists();
+
+async function buildReminderStack(stack) {
+    const taskLists = await getTasks();
     let dueCount = taskLists.dueReminders.length;
     let upcomingCount = taskLists.upcomingReminders.length;
     if (dueCount > 0) {
@@ -166,10 +168,10 @@ async function generateReminders(stack) {
         dueStack.setPadding(5, 8, 5, 5);
         dueStack.url = "x-apple-reminderkit://TODAY";
         const dueTitleStack = dueStack.addStack();
-        generateRemindersTitle(dueTitleStack, taskLists.dueReminders.length, "Due Today")
+        addReminderTitle(dueTitleStack, taskLists.dueReminders.length, "Due Today")
         taskLists.dueReminders
             .splice(0, 6)
-            .forEach((task) => generateRemindersEntry(dueStack, task, false));
+            .forEach((task) => addTaskEntry(dueStack, task, false));
     }
 
     if (dueCount <= 5 && upcomingCount > 0) {
@@ -177,14 +179,14 @@ async function generateReminders(stack) {
         upcomingStack.setPadding(2, 8, 0, 5);
         upcomingStack.url = "x-apple-reminderkit://REMINDER/SCHEDULED";
         const upcomingTitleStack = upcomingStack.addStack();
-        generateRemindersTitle(upcomingTitleStack, taskLists.upcomingReminders.length, "Upcoming")
+        addReminderTitle(upcomingTitleStack, taskLists.upcomingReminders.length, "Upcoming")
         taskLists.upcomingReminders
             .splice(0, 5 - dueCount)
-            .forEach((task) => generateRemindersEntry(upcomingStack, task, true));
+            .forEach((task) => addTaskEntry(upcomingStack, task, true));
     }
 }
   
-function generateRemindersTitle(stack, taskCount, titleContent) {
+function addReminderTitle(stack, taskCount, titleContent) {
     stack.layoutHorizontally();
     stack.centerAlignContent();
   
@@ -202,7 +204,7 @@ function generateRemindersTitle(stack, taskCount, titleContent) {
     title.textColor = new Color(colorReminderTitle);
 }
   
-function generateRemindersEntry(stack, task, showDate) {
+function addTaskEntry(stack, task, showDate) {
     stack.layoutVertically();
     stack.addSpacer(4);
     const entryStack = stack.addStack();
@@ -214,23 +216,23 @@ function generateRemindersEntry(stack, task, showDate) {
         if (task.dueDateIncludesTime) {
             dF.dateFormat = "HH:mm";
             let timeText = dF.string(task.dueDate);
-            generateItemTitle(entryStack, task.title, colorReminderText, timeText, colorReminderText);
+            addEntry(entryStack, task.title, colorReminderText, timeText, colorReminderText);
         } else {
-            generateItemTitle(entryStack, task.title, colorReminderText);
+            addEntry(entryStack, task.title, colorReminderText);
         }
     } else {
         if (task.dueDate < tomorrowEnd) {
             const timeText = "Tmr";
-            generateItemTitle(entryStack, task.title, colorReminderText, timeText, colorReminderText);
+            addEntry(entryStack, task.title, colorReminderText, timeText, colorReminderText);
         } else {
             dF.dateFormat = "MM/dd";
             const timeText = dF.string(task.dueDate);
-            generateItemTitle(entryStack, task.title, colorReminderText, timeText, colorReminderText);
+            addEntry(entryStack, task.title, colorReminderText, timeText, colorReminderText);
         }
     }
 }
 
-function generateItemTitle(stack, title, titleColor, date, dateColor) {
+function addEntry(stack, title, titleColor, date, dateColor) {
     stack.layoutHorizontally();
     stack.bottomAlignContent();
     const textStack = stack.addStack();
@@ -249,13 +251,16 @@ function generateItemTitle(stack, title, titleColor, date, dateColor) {
     }
 }
 
-function generateRefreshTime(stack, refreshTime) {
+function addRefreshTimeStack(stack) {
+    let refreshAfterDate = new Date();
+    refreshAfterDate.setSeconds(refreshAfterDate.getSeconds() + 5);
+    widget.refreshAfterDate = refreshAfterDate;
     dF.dateFormat = "HH:mm:ss";
     // let refreshTimeText = dF.string(refreshTime);
     const refreshTimeStack = stack.addStack();
     refreshTimeStack.layoutHorizontally();
     refreshTimeStack.addSpacer();
-    const refreshTimeText = refreshTimeStack.addText("Last refresh: " + dF.string(refreshTime));
+    const refreshTimeText = refreshTimeStack.addText("Last refresh: " + dF.string(refreshAfterDate));
     refreshTimeText.textColor = new Color(colorReminderText);
     refreshTimeText.font = Font.semiboldSystemFont(8);
     refreshTimeText.lineLimit = 1;
