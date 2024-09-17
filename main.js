@@ -285,9 +285,9 @@ function buildBackgroundImage(text) {
 
     // Create semi-transparent text
     let alpha = 0.2;
-    drawContext.setFont(Font.boldSystemFont(20));
+    drawContext.setFont(new Font("Helvetica-BoldOblique", 23));
     drawContext.setTextColor(new Color("#FFFFFF", alpha));
-    drawContext.drawTextInRect(text, new Rect(0, 50, drawContext.size.width, 50));
+    drawContext.drawTextInRect(text, new Rect(-2, 50, drawContext.size.width, 50));
 
     // Return image format
     let image = drawContext.getImage();
