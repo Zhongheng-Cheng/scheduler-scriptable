@@ -35,6 +35,11 @@ await buildCalendarStack(rightStack);
 rightStack.addSpacer();
 addRefreshTimeStack(rightStack);
 
+// Build background image
+let dateText = await getTodayDateText();
+let image = buildBackgroundImage(dateText);
+widget.backgroundImage = image;
+
 // Run the widget
 if (config.runsInWidget) {
   Script.setWidget(widget);
@@ -264,4 +269,27 @@ function addRefreshTimeStack(stack) {
     refreshTimeText.textColor = new Color(colorReminderText);
     refreshTimeText.font = Font.semiboldSystemFont(8);
     refreshTimeText.lineLimit = 1;
+}
+
+async function getTodayDateText() {
+    let today = new Date();
+    dF.dateFormat = "MMM d";
+    return dF.string(today);
+}
+
+function buildBackgroundImage(text) {
+    let drawContext = new DrawContext();
+    drawContext.size = new Size(100, 100);
+    drawContext.opaque = false;
+    drawContext.respectScreenScale = true;
+
+    // Create semi-transparent text
+    let alpha = 0.2;
+    drawContext.setFont(new Font("Helvetica-BoldOblique", 23));
+    drawContext.setTextColor(new Color("#FFFFFF", alpha));
+    drawContext.drawTextInRect(text, new Rect(-2, 50, drawContext.size.width, 50));
+
+    // Return image format
+    let image = drawContext.getImage();
+    return image;
 }
