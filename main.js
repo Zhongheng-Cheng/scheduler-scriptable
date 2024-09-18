@@ -260,7 +260,7 @@ function addRefreshTimeStack(stack) {
     let refreshAfterDate = new Date();
     refreshAfterDate.setSeconds(refreshAfterDate.getSeconds() + 5);
     widget.refreshAfterDate = refreshAfterDate;
-    dF.dateFormat = "HH:mm:ss";
+    dF.dateFormat = "HH:mm E";
     // let refreshTimeText = dF.string(refreshTime);
     const refreshTimeStack = stack.addStack();
     refreshTimeStack.layoutHorizontally();
