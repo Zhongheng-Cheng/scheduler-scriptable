@@ -167,7 +167,7 @@ async function buildReminderStack(stack) {
     if (dueCount > 0) {
         let dueStack = stack.addStack();
         dueStack.layoutVertically();
-        dueStack.backgroundColor = new Color(colorReminderDueToday);
+        dueStack.backgroundColor = new Color(colorReminderDueToday, 0.6);
         dueStack.cornerRadius = 15;
         dueStack.size = new Size(160, 0);
         dueStack.setPadding(5, 8, 5, 5);
